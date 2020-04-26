@@ -3,6 +3,7 @@ package br.edu.cesmac.nolapi.resources;
 import java.net.URI;
 import java.util.List;
 
+import br.edu.cesmac.nolapi.service.EditoriasService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,23 +17,22 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.edu.cesmac.nolapi.domain.Editoria;
-import br.edu.cesmac.nolapi.repository.EditoriasRepository;
 
 @RestController
 @RequestMapping("/editorias")
 public class EditoriasResources {
 
 	@Autowired
-	private EditoriasRepository editoriasRepository;
+	private EditoriasService editoriasService;
 
 	@GetMapping
 	public List<Editoria> listar() {
-		return editoriasRepository.findAll();
+		return editoriasService.listar();
 	}
 
 	@PostMapping
 	public ResponseEntity<Void> salvar(@RequestBody Editoria editoria) {
-		editoriasRepository.save(editoria);
+		editoriasService.salvar(editoria);
 		
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
 				.buildAndExpand(editoria.getIdEditoria()).toUri();
@@ -42,18 +42,18 @@ public class EditoriasResources {
 
 	@PutMapping
 	public void atualizar(@RequestBody Editoria editoria) {
-		editoriasRepository.save(editoria);
+		editoriasService.atualizar(editoria);
 	}
 
-	@DeleteMapping
-	public void deletar(@RequestBody Editoria editoria) {
-		editoriasRepository.delete(editoria);
+	@DeleteMapping(value = "/{id}")
+	public void deletar(@PathVariable("id") Long idEditoria) throws Exception {
+		editoriasService.deletarPorId(idEditoria);
 	}
 	
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<Editoria> buscarPorId(@PathVariable("id") Long idEditoria) {
-		return editoriasRepository.findById(idEditoria).map(editoria -> ResponseEntity.ok(editoria)).orElse(ResponseEntity.notFound().build());
+	public ResponseEntity<Editoria> buscarPorId(@PathVariable("id") Long idEditoria) throws Exception {
+		Editoria editoria = editoriasService.buscarPorId(idEditoria);
+		return ResponseEntity.ok(editoria);
 	}
 
 }
-		

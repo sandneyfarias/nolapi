@@ -3,6 +3,7 @@ package br.edu.cesmac.nolapi.resources;
 import java.net.URI;
 import java.util.List;
 
+import br.edu.cesmac.nolapi.service.JornalistasService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,20 +22,20 @@ import br.edu.cesmac.nolapi.repository.JornalistasRepository;
 @RequestMapping("/jornalistas")
 public class JornalistasResource {
 
-	private JornalistasRepository jornalistasRepository;
+	private JornalistasService jornalistasService;
 
-	public JornalistasResource(JornalistasRepository jornalistasRepository) {
-		this.jornalistasRepository = jornalistasRepository;
+	public JornalistasResource(JornalistasService jornalistasService) {
+		this.jornalistasService = jornalistasService;
 	}
 
 	@GetMapping
 	public List<Jornalista> listar() {
-		return jornalistasRepository.findAll();
+		return jornalistasService.listar();
 	}
 
 	@PostMapping
 	public ResponseEntity<Void> salvar(@RequestBody Jornalista jornalista) {
-		jornalistasRepository.save(jornalista);
+		jornalistasService.salvar(jornalista);
 
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
 				.buildAndExpand(jornalista.getIdJornalista()).toUri();
@@ -44,18 +45,17 @@ public class JornalistasResource {
 
 	@PutMapping
 	public void alterar(@RequestBody Jornalista jornalista) {
-		jornalistasRepository.save(jornalista);
+		jornalistasService.atualizar(jornalista);
 	}
 
-	@DeleteMapping
-	public void deletar(@RequestBody Jornalista jornalista) {
-		jornalistasRepository.delete(jornalista);
+	@DeleteMapping(value = "/{id}")
+	public void deletar(@PathVariable("id") Long idJornalista) throws Exception {
+		jornalistasService.deletarPorId(idJornalista);
 	}
 
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<Jornalista> buscarPorId(@PathVariable("id") Long idJornalista) {
-		return jornalistasRepository.findById(idJornalista).map(jornalista -> ResponseEntity.ok(jornalista))
-				.orElse(ResponseEntity.notFound().build());
+	public ResponseEntity<Jornalista> buscarPorId(@PathVariable("id") Long idJornalista) throws Exception {
+		return ResponseEntity.ok(jornalistasService.buscarPorId(idJornalista));
 	}
 
 }
